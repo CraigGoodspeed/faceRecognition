@@ -1,7 +1,9 @@
 import face_recognition
-from playsound import playsound
+from pydub import AudioSegment
+from pydub import playback
 from PIL import Image, ImageDraw
 import cv2
+import os
 import numpy
 
 
@@ -37,8 +39,10 @@ known_names = [
     "Gwynneth Goodspeed"
 ]
 sounds = [
-    './sound/howsit.mp4'
+    '/home/craig/PycharmProjects/faceRecognition/venv/sound/Howsit.m4a'
 ]
+
+
 
 #anotherEncoding = create_face_encoding('./img/zaza.jpg')[0]
 #print(face_recognition.compare_faces([craigEncoding], anotherEncoding));
@@ -49,7 +53,11 @@ sounds = [
 
 
 def show_webcam():
-    cam = cv2.VideoCapture(0)
+    print(cv2.getBuildInformation())
+
+    os.environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"] = "rtsp_transport;udp"
+    cam = cv2.VideoCapture("rtsp://admin:password123@192.168.88.28:554/onvif1", cv2.CAP_FFMPEG)
+
     process_this_frame = True
     counter = 0
     while True:
@@ -59,12 +67,11 @@ def show_webcam():
 
         # Convert the image from BGR color (which OpenCV uses) to RGB color (which face_recognition uses)
         rgb_small_frame = small_frame[:, :, ::-1]
+        face_locations = face_recognition.face_locations(rgb_small_frame)
+        face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations)
 
+        if counter % 2 == 0:
 
-
-        if counter % 3 == 0:
-            face_locations = face_recognition.face_locations(rgb_small_frame)
-            face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations)
             face_names = []
             counter = 0
             for face_encoding in face_encodings:
@@ -75,7 +82,8 @@ def show_webcam():
                 best_match_index = numpy.argmin(face_distances)
                 if match[best_match_index]:
                     name=known_names[best_match_index]
-                    playsound(sounds[0])
+                    if sounds[best_match_index] is not None:
+                        playback.play(AudioSegment.from_file(sounds[best_match_index]))
                 face_names.append(name)
 
         counter = counter + 1
@@ -92,9 +100,9 @@ def show_webcam():
             font = cv2.FONT_HERSHEY_DUPLEX
             addOn = cv2.getTextSize(name, font, 1, 1 )
             rightPos = 0
-            if  (left + addOn[0][0]) > right :
+            if(left + addOn[0][0]) > right:
                 rightPos = (left + addOn[0][0])
-            else :
+            else:
                 rightPos = right
             cv2.rectangle(img, (left, bottom - 35), (rightPos, bottom), (255, 0, 0), cv2.FILLED)
             cv2.putText(img, name, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
