@@ -83,6 +83,7 @@ def show_webcam():
                 if match[best_match_index]:
                     name=known_names[best_match_index]
                     if sounds[best_match_index] is not None:
+                        #TODO thread this piece of code, no need to slow the image recognition down. should also only play once per n minutes
                         playback.play(AudioSegment.from_file(sounds[best_match_index]))
                 face_names.append(name)
 
