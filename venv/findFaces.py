@@ -8,7 +8,6 @@ import cv2
 import os
 import numpy
 
-from venv.Person import Person
 
 
 def create_face_encoding(ldpath):
@@ -33,6 +32,14 @@ class MyThread(threading.Thread):
     def run(self):
         playback.play(AudioSegment.from_file(self.person.sound))
         self.person.playing = 0
+
+class Person:
+    def __init__(self, image, sound, display_name):
+        self.image = image
+        self.sound = sound
+        self.display_name = display_name
+        self.playing = 0
+
 
 
 #path = './img/craig.jpg'
