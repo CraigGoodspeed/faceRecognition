@@ -1,11 +1,14 @@
 import face_recognition
 import threading
+
 from pydub import AudioSegment
 from pydub import playback
 from PIL import Image, ImageDraw
 import cv2
 import os
 import numpy
+
+from venv.Person import Person
 
 
 def create_face_encoding(ldpath):
@@ -24,11 +27,12 @@ class LabelAndEncoding:
 
 class MyThread(threading.Thread):
     def __init__(self, play_me):
-        self.val = play_me
+        self.person = play_me
         threading.Thread.__init__(self)
 
     def run(self):
-        playback.play(AudioSegment.from_file(self.val))
+        playback.play(AudioSegment.from_file(self.person.sound))
+        self.person.playing = 0
 
 
 #path = './img/craig.jpg'
@@ -51,7 +55,20 @@ known_names = [
 sounds = [
     '/home/craig/PycharmProjects/faceRecognition/venv/sound/Howsit.m4a'
 ]
-
+#create_face_encoding('./img/zaza.jpg')[0]
+#image, sound, display_name):
+people = [
+    Person(
+        create_face_encoding('./img/zaza.jpg')[0],
+        '/home/craig/PycharmProjects/faceRecognition/venv/sound/Howsit.m4a',
+        "Craig Goodspeed"
+    ),
+    Person(
+        create_face_encoding('./img/g2.jpeg')[0],
+        None,
+        "Gwynneth Goodspeed"
+    )
+]
 
 
 #anotherEncoding = create_face_encoding('./img/zaza.jpg')[0]
@@ -59,6 +76,11 @@ sounds = [
 
 ## --> check ls -ltrh /dev/video* to get all cameras
 
+def getKnownEncodings():
+    to_return = []
+    for p in people:
+        to_return.append(p.image)
+    return to_return
 
 
 
@@ -85,17 +107,18 @@ def show_webcam():
             face_names = []
             counter = 0
             for face_encoding in face_encodings:
-                match = face_recognition.compare_faces(known_encodings, face_encoding)
+                match = face_recognition.compare_faces(getKnownEncodings(), face_encoding)
                 name = "unknown"
                 #the most likely will have the smallest distance
-                face_distances = face_recognition.face_distance(known_encodings, face_encoding)
+                face_distances = face_recognition.face_distance(getKnownEncodings(), face_encoding)
                 best_match_index = numpy.argmin(face_distances)
                 if match[best_match_index]:
-                    name=known_names[best_match_index]
-                    if sounds[best_match_index] is not None:
+                    name=people[best_match_index].display_name
+                    if people[best_match_index].sound is not None and people[best_match_index].playing == 0:
                         #TODO thread this piece of code, no need to slow the image recognition down. should also only play once per n minutes
-                        thrd = MyThread(sounds[best_match_index])
+                        thrd = MyThread(people[best_match_index])
                         thrd.start()
+                        people[best_match_index].playing = 1
                         #threading.Thread(target=playback.play(AudioSegment.from_file(sounds[best_match_index]))).start()
                 face_names.append(name)
 
