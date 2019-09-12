@@ -72,7 +72,7 @@ people = [
     ),
     Person(
         create_face_encoding('./img/g2.jpeg')[0],
-        None,
+        '/home/craig/PycharmProjects/faceRecognition/venv/sound/helloWife.m4a',
         "Gwynneth Goodspeed"
     )
 ]
