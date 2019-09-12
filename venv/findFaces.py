@@ -1,4 +1,5 @@
 import face_recognition
+import threading
 from pydub import AudioSegment
 from pydub import playback
 from PIL import Image, ImageDraw
@@ -19,6 +20,15 @@ class LabelAndEncoding:
     def __init__(self, encoding, label):
         self.encoding = encoding
         self.label = label
+
+
+class MyThread(threading.Thread):
+    def __init__(self, play_me):
+        self.val = play_me
+        threading.Thread.__init__(self)
+
+    def run(self):
+        playback.play(AudioSegment.from_file(self.val))
 
 
 #path = './img/craig.jpg'
@@ -56,7 +66,7 @@ def show_webcam():
     print(cv2.getBuildInformation())
 
     os.environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"] = "rtsp_transport;udp"
-    cam = cv2.VideoCapture("rtsp://admin:password123@192.168.88.28:554/onvif1", cv2.CAP_FFMPEG)
+    cam = cv2.VideoCapture("rtsp://admin:password123@192.168.88.23:554/onvif1", cv2.CAP_FFMPEG)
 
     process_this_frame = True
     counter = 0
@@ -84,7 +94,9 @@ def show_webcam():
                     name=known_names[best_match_index]
                     if sounds[best_match_index] is not None:
                         #TODO thread this piece of code, no need to slow the image recognition down. should also only play once per n minutes
-                        playback.play(AudioSegment.from_file(sounds[best_match_index]))
+                        thrd = MyThread(sounds[best_match_index])
+                        thrd.start()
+                        #threading.Thread(target=playback.play(AudioSegment.from_file(sounds[best_match_index]))).start()
                 face_names.append(name)
 
         counter = counter + 1
