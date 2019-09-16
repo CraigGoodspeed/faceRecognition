@@ -7,7 +7,7 @@ from PIL import Image, ImageDraw
 import cv2
 import os
 import numpy
-
+from Person import *
 
 
 def create_face_encoding(ldpath):
@@ -33,49 +33,10 @@ class MyThread(threading.Thread):
         playback.play(AudioSegment.from_file(self.person.sound))
         self.person.playing = 0
 
-class Person:
-    def __init__(self, image, sound, display_name):
-        self.image = image
-        self.sound = sound
-        self.display_name = display_name
-        self.playing = 0
-
-
-
-#path = './img/craig.jpg'
-
-#for face_location in face_locations(path):
-#    top, right, bottom, left = face_location
-#    face_image = face_recognition.load_image_file(path)[top:bottom, left:right]
-#    pil_image = Image.fromarray(face_image)
-#    pil_image.save(f'./img/{top}.jpg')
-
-
-known_encodings = [
-    create_face_encoding('./img/zaza.jpg')[0],
-    create_face_encoding('./img/g2.jpeg')[0]
-]
-known_names = [
-    "Craig Goodspeed",
-    "Gwynneth Goodspeed"
-]
-sounds = [
-    '/home/craig/PycharmProjects/faceRecognition/venv/sound/Howsit.m4a'
-]
 #create_face_encoding('./img/zaza.jpg')[0]
 #image, sound, display_name):
-people = [
-    Person(
-        create_face_encoding('./img/zaza.jpg')[0],
-        '/home/craig/PycharmProjects/faceRecognition/venv/sound/Howsit.m4a',
-        "Craig Goodspeed"
-    ),
-    Person(
-        create_face_encoding('./img/g2.jpeg')[0],
-        '/home/craig/PycharmProjects/faceRecognition/venv/sound/helloWife.m4a',
-        "Gwynneth Goodspeed"
-    )
-]
+
+people = Person.getPeople()
 
 
 #anotherEncoding = create_face_encoding('./img/zaza.jpg')[0]
@@ -86,7 +47,7 @@ people = [
 def getKnownEncodings():
     to_return = []
     for p in people:
-        to_return.append(p.image)
+        to_return.append(p.face_encoding)
     return to_return
 
 
@@ -95,7 +56,7 @@ def show_webcam():
     print(cv2.getBuildInformation())
 
     os.environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"] = "rtsp_transport;udp"
-    cam = cv2.VideoCapture("rtsp://admin:password123@192.168.88.23:554/onvif1", cv2.CAP_FFMPEG)
+    cam = cv2.VideoCapture("rtsp://admin:password123@192.168.88.37:554/onvif1", cv2.CAP_FFMPEG)
 
     process_this_frame = True
     counter = 0
