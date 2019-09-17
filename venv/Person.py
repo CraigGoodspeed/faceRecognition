@@ -56,10 +56,11 @@ class Person:
     @staticmethod
     def generateCraig():
         a = Person(
-            './img/zaza.jpg',
+            './img/g2.jpeg',
             '/home/craig/PycharmProjects/faceRecognition/venv/sound/Howsit.m4a',
-            "Craig Goodspeed"
+            "Gwynneth Goodspeed"
         )
         a.writePersonData()
 
 
+#Person.generateCraig()
